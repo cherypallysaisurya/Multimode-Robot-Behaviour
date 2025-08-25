@@ -15,6 +15,7 @@ to handle error cases and implement proper movement logic.
 
 from robot_behavior.core.robot import Robot, Position
 from robot_behavior.simulator.enhanced_simulator import RobotProgram
+from robot_behavior.controllers import build_program, Program  # new unified abstraction
 
 # Simple maze layouts for educational use
 SIMPLE_MAZE = [
@@ -36,20 +37,26 @@ STUDENT_MAZE = [
     ['.', '.', '.', '.', '.', '.', '.', '.']
 ]
 
-def create_robot_program(width=10, height=10, start_x=0, start_y=0):
-    """
-    Create a new robot program for student exercises.
-    
+def create_robot_program(width=10, height=10, start_x=0, start_y=0, mode: str = 'simulator', host: str | None = None):
+    """Create a new program.
+
+    Backwards compatible: existing code (without *mode*) still gets the original
+    simulator behavior. When *mode='real'* a unified `Program` wrapping a Go1
+    controller is returned. In simulator mode a `Program` wrapping the original
+    RobotProgram is returned (legacy attributes still accessible).
+
     Args:
-        width: Grid width
-        height: Grid height
-        start_x: Starting X position
-        start_y: Starting Y position
-        
+        width, height: Grid size (simulator mode only; ignored for real mode)
+        start_x, start_y: Start coordinates (simulator mode only)
+        mode: 'simulator' (default) or 'real'
+        host: Optional hostname / IP for the real robot (real mode)
+
     Returns:
-        RobotProgram: Program instance with robot and simulator
+        Program | RobotProgram (legacy) – but consistently exposes `.robot.move()`.
     """
-    return RobotProgram(width, height, start_x, start_y)
+    # For compatibility with tests expecting a RobotProgram object *type*, we only
+    # wrap with Program. Tests rely on program.robot.* so facade preserves access.
+    return build_program(width, height, start_x, start_y, mode=mode, host=host)
 
 def run_with_visualization(program, moves_function, move_delay=1.5):
     """
@@ -169,7 +176,8 @@ def load_maze_from_file(filename):
 __all__ = [
     'Robot',
     'Position', 
-    'RobotProgram',
+    'RobotProgram',  # legacy export
+    'Program',       # new abstraction
     'create_robot_program',
     'run_with_visualization',
     'run_fast',

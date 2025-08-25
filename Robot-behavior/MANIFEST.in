@@ -1,0 +1,7 @@
+include README.md
+include LICENSE
+recursive-include robot_behavior/assets *.png *.jpg *.md
+recursive-include docs *.md
+recursive-include examples *.py *.md
+prune tests/__pycache__
+global-exclude __pycache__ *.py[cod]

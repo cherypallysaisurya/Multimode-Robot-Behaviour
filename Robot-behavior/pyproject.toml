@@ -1,0 +1,137 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "robot-behavior-simulator"
+version = "1.0.3"
+description = "Educational robot simulation framework for teaching programming concepts through visual interaction"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Robot Behavior Team", email = "cherypallysaisurya@gmail.com"}
+]
+maintainers = [
+    {name = "Robot Behavior Team", email = "cherypallysaisurya@gmail.com"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Education",
+    "Intended Audience :: Developers",
+    "Topic :: Education",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+    "Environment :: X11 Applications :: GTK",
+    "Environment :: Win32 (MS Windows)",
+    "Environment :: MacOS X",
+]
+keywords = [
+    "education", "programming", "robot", "simulation", "learning",
+    "beginner", "visual", "interactive", "tkinter", "maze", "teaching",
+    "computer-science", "python-education", "programming-education"
+]
+dependencies = [
+    "Pillow>=8.0.0",
+]
+requires-python = ">=3.7"
+## Removed dynamic versioning to avoid duplication; single source of truth is static version above.
+
+[project.urls]
+Homepage = "https://github.com/cherypallysaisurya/2d-Robot-dog-Simulation"
+Documentation = "https://github.com/cherypallysaisurya/2d-Robot-dog-Simulation#readme"
+Repository = "https://github.com/cherypallysaisurya/2d-Robot-dog-Simulation.git"
+"Bug Tracker" = "https://github.com/cherypallysaisurya/2d-Robot-dog-Simulation/issues"
+"Source Code" = "https://github.com/cherypallysaisurya/2d-Robot-dog-Simulation"
+"Download" = "https://pypi.org/project/robot-behavior-simulator/"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov>=2.10",
+    "black>=21.0",
+    "flake8>=3.8",
+    "mypy>=0.800",
+    "build>=0.8.0",
+    "twine>=4.0.0",
+]
+test = [
+    "pytest>=6.0", 
+    "pytest-cov>=2.10",
+]
+docs = [
+    "sphinx>=4.0",
+    "sphinx-rtd-theme>=1.0",
+]
+
+[project.scripts]
+robot-demo = "robot_behavior.minimal_api:run_demo_example"
+
+[tool.setuptools]
+packages = ["robot_behavior", "robot_behavior.core", "robot_behavior.simulator"]
+include-package-data = true
+
+[tool.setuptools.package-data]
+robot_behavior = ["assets/*.png", "assets/*.jpg"]
+
+# Black formatting configuration
+[tool.black]
+line-length = 88
+target-version = ['py37']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+# Pytest configuration
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*", "*Test"]
+python_functions = ["test_*"]
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--verbose",
+    "--cov=robot_behavior",
+    "--cov-report=html",
+    "--cov-report=term-missing",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "gui: marks tests that require GUI (may fail in headless environments)",
+]
+
+# MyPy configuration
+[tool.mypy]
+python_version = "3.7"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true

@@ -1,0 +1,10 @@
+# Requirements file for robot-behavior-simulator package
+# For installation: pip install -r requirements.txt
+
+# Core dependencies
+Pillow>=8.0.0
+
+# Optional development dependencies (uncomment if needed)
+# pytest>=6.0
+# black>=21.0
+# flake8>=3.8

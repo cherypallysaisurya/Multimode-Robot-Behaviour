@@ -59,26 +59,45 @@ def create_robot_program(width=10, height=10, start_x=0, start_y=0, mode: str = 
     return build_program(width, height, start_x, start_y, mode=mode, host=host)
 
 def run_with_visualization(program, moves_function, move_delay=1.5):
-    """
-    Run student code with automatic real-time visualization.
+    """Run student code with visualization *or* timed playback.
+
+    Works for both simulator and real modes so the same student file can be
+    reused:
+
+    - Simulator mode: launches GUI and animates moves with delay.
+    - Real mode: executes moves sequentially with ``time.sleep(move_delay)``
+      between moves (no GUI). If you need per-move custom speed/time values,
+      include them in your own calls to ``program.robot.move``; the added
+      sleep just spaces the commands similarly to the simulator animation.
     
     Args:
-        program: Robot program created with create_robot_program()
+        program: Program (simulator or real)
         moves_function: Function containing robot moves
         move_delay: Delay in seconds between moves (default: 1.5)
-        
-    Example:
-        program = create_robot_program(5, 5, 0, 1)
-        def my_moves():
-            program.robot.move('right')
-            program.robot.move('up')
-        run_with_visualization(program, my_moves, move_delay=2.0)  # Slower
-        run_with_visualization(program, my_moves, move_delay=0.8)  # Faster
     """
     import threading
     import platform
     import time
     from robot_behavior.core.robot import Position
+
+    # --- Real mode shortcut (no GUI/animation) ---
+    if getattr(program, 'mode', 'simulator') == 'real':
+        print("🛠️ Real mode: running moves sequentially (no GUI) ...")
+        # Wrap robot.move to inject delay *after* each successful/attempted move
+        original_move = program.robot.move
+
+        def move_with_delay(direction):
+            result = original_move(direction)
+            time.sleep(move_delay)
+            return result
+
+        program.robot.move = move_with_delay  # type: ignore
+        try:
+            moves_function()
+        finally:
+            program.robot.move = original_move  # restore
+        print("✅ Real mode sequence complete.")
+        return
     
     def enhanced_moves():
         """Wrapper that adds simulator notifications to basic robot moves."""

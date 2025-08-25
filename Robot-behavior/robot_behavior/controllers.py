@@ -32,6 +32,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Optional, Callable, Any
+import os
 
 # Direction mapping accepted for both backends
 VALID_DIRECTIONS = {"up", "down", "left", "right"}
@@ -64,19 +65,41 @@ class SimulationController(BaseController):
 
 
 class Go1Controller(BaseController):
-    """Adapter wrapping a real Dog instance (from go1_py)."""
+    """Adapter wrapping a real Dog instance (from go1_py) or a mock.
+
+    Mock mode
+    ---------
+    If the environment variable ``ROBOT_BEHAVIOR_HARDWARE_MOCK=1`` is set,
+    a lightweight in‑memory fake Dog is used so developers without hardware
+    can still exercise the unified real-mode pathway.
+    """
 
     def __init__(self, host: Optional[str] = None):
-        try:
-            from go1_py import Dog  # type: ignore
-        except Exception as e:  # pragma: no cover - env dependent
-            raise ImportError(
-                "go1_py package is required for real mode. Install extras: 'pip install robot-behavior-simulator[hardware]'"
-            ) from e
+        mock_enabled = os.getenv("ROBOT_BEHAVIOR_HARDWARE_MOCK") == "1"
+        self._mock_log: list[str] = []
 
-        self._dog = Dog(host) if host else Dog()
+        if mock_enabled:
+            class FakeDog:  # pragma: no cover - simple container
+                def __init__(self, log: list[str]):
+                    self._log = log
+                def go_forward(self, speed, t): self._log.append(f"forward speed={speed} time={t}")
+                def go_backward(self, speed, t): self._log.append(f"backward speed={speed} time={t}")
+                def go_left(self, speed, t): self._log.append(f"left speed={speed} time={t}")
+                def go_right(self, speed, t): self._log.append(f"right speed={speed} time={t}")
+                def change_mode(self, mode): self._log.append(f"mode={mode}")
+                def stop_moving(self): self._log.append("stop")
+            self._dog = FakeDog(self._mock_log)
+            print("🧪 Real mode mock enabled (ROBOT_BEHAVIOR_HARDWARE_MOCK=1) – no MQTT connection attempted.")
+        else:
+            try:
+                from go1_py import Dog  # type: ignore
+            except Exception as e:  # pragma: no cover - env dependent
+                raise ImportError(
+                    "go1_py package is required for real mode. Install extras: 'pip install robot-behavior-simulator[hardware]' or set ROBOT_BEHAVIOR_HARDWARE_MOCK=1 to mock."
+                ) from e
+            self._dog = Dog(host) if host else Dog()
 
-        # Map directions to bound methods (closure capturing dog)
+        # Map directions to bound methods (closure capturing dog or fake dog)
         self._direction_map: dict[str, Callable[[float, float], Any]] = {
             "up": self._dog.go_forward,
             "down": self._dog.go_backward,
@@ -101,6 +124,9 @@ class Go1Controller(BaseController):
         except Exception as e:  # pragma: no cover - runtime safety
             print(f"⚠️ Move failed ({direction}): {e}")
             return False
+
+    def mock_log(self) -> list[str]:  # expose captured log for tests when mocked
+        return list(self._mock_log)
 
 
 class UnifiedRobot:

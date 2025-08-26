@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "myrobot"
+version = "0.1.0"
+description = "Unified educational robot API: simulator + optional real Go1 control"
+readme = "README.md"
+authors = [{name="Your Name", email="you@example.com"}]
+license = {text = "MIT"}
+requires-python = ">=3.10"
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Intended Audience :: Education",
+  "Topic :: Education",
+]
+dependencies = []
+
+[project.optional-dependencies]
+hardware = ["go1-py", "paho-mqtt", "numpy"]
+visual = ["Pillow"]
+
+[project.urls]
+Homepage = "https://github.com/cherypallysaisurya/Multimode-Robot-Behaviour"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]

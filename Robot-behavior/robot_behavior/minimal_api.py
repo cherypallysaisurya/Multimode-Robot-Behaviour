@@ -37,7 +37,7 @@ STUDENT_MAZE = [
     ['.', '.', '.', '.', '.', '.', '.', '.']
 ]
 
-def create_robot_program(width=10, height=10, start_x=0, start_y=0, mode: str = 'simulator', host: str | None = None):
+def create_robot_program(width=10, height=10, start_x=0, start_y=0, mode: str = 'simulator', host: str | None = None, initial_mode: str | None = "Walk"):
     """Create a new program.
 
     Backwards compatible: existing code (without *mode*) still gets the original
@@ -56,7 +56,7 @@ def create_robot_program(width=10, height=10, start_x=0, start_y=0, mode: str = 
     """
     # For compatibility with tests expecting a RobotProgram object *type*, we only
     # wrap with Program. Tests rely on program.robot.* so facade preserves access.
-    return build_program(width, height, start_x, start_y, mode=mode, host=host)
+    return build_program(width, height, start_x, start_y, mode=mode, host=host, initial_mode=initial_mode)
 
 def run_with_visualization(program, moves_function, move_delay=1.5):
     """Run student code with visualization *or* timed playback.

@@ -72,9 +72,22 @@ class Go1Controller(BaseController):
     If the environment variable ``ROBOT_BEHAVIOR_HARDWARE_MOCK=1`` is set,
     a lightweight in‑memory fake Dog is used so developers without hardware
     can still exercise the unified real-mode pathway.
+
+    Auto mode selection
+    -------------------
+    Many real‑world scripts start by doing::
+
+        dog = Dog("go1-max")
+        dog.change_mode(Mode.Walk)
+
+    To remove that boilerplate we optionally auto‑set an initial mode
+    (default: "Walk"). Pass ``initial_mode=None`` to skip. A different
+    starting mode can be supplied (e.g. "Stand"). The string is matched
+    against attributes of ``go1_py.Mode`` (case sensitive by convention).
+    Failures are printed but non‑fatal so student code can still run.
     """
 
-    def __init__(self, host: Optional[str] = None):
+    def __init__(self, host: Optional[str] = None, initial_mode: Optional[str] = "Walk"):
         mock_enabled = os.getenv("ROBOT_BEHAVIOR_HARDWARE_MOCK") == "1"
         self._mock_log: list[str] = []
 
@@ -98,6 +111,20 @@ class Go1Controller(BaseController):
                     "go1_py package is required for real mode. Install extras: 'pip install robot-behavior-simulator[hardware]' or set ROBOT_BEHAVIOR_HARDWARE_MOCK=1 to mock."
                 ) from e
             self._dog = Dog(host) if host else Dog()
+
+        # Optionally change to requested initial mode (real hardware or mock)
+        if initial_mode:
+            try:
+                # Mock fake dog just records the call; real dog needs Mode enum
+                if not mock_enabled:
+                    from go1_py import Mode  # type: ignore
+                    mode_member = getattr(Mode, initial_mode)
+                    self._dog.change_mode(mode_member)
+                else:
+                    self._dog.change_mode(initial_mode)
+                print(f"🚀 Real robot initial mode set to {initial_mode}")
+            except Exception as e:  # pragma: no cover - defensive
+                print(f"⚠️ Could not set initial mode '{initial_mode}': {e}")
 
         # Map directions to bound methods (closure capturing dog or fake dog)
         self._direction_map: dict[str, Callable[[float, float], Any]] = {
@@ -187,19 +214,34 @@ class Program:
         raise AttributeError(item)
 
 
-def build_program(width: int, height: int, start_x: int, start_y: int, mode: str = 'simulator', host: str | None = None) -> Program:
-    """Factory constructing a Program for the requested mode."""
+def build_program(
+    width: int,
+    height: int,
+    start_x: int,
+    start_y: int,
+    mode: str = 'simulator',
+    host: str | None = None,
+    initial_mode: str | None = "Walk",
+) -> Program:
+    """Factory constructing a Program for the requested mode.
+
+    Args:
+        width, height: Grid size for simulator mode.
+        start_x, start_y: Start coordinates for simulator mode.
+        mode: 'simulator' or 'real'.
+        host: Optional robot hostname/IP (real mode).
+        initial_mode: Optional initial movement mode for real robot (e.g. 'Walk').
+    """
     mode = (mode or 'simulator').lower()
     if mode == 'simulator':
         from robot_behavior.simulator.enhanced_simulator import RobotProgram  # local import
         inner = RobotProgram(width, height, start_x, start_y)
         controller = SimulationController(inner.robot)
         return Program(mode='simulator', inner_program=inner, controller=controller)
-    elif mode == 'real':
-        controller = Go1Controller(host=host)
+    if mode == 'real':
+        controller = Go1Controller(host=host, initial_mode=initial_mode)
         return Program(mode='real', inner_program=None, controller=controller)
-    else:
-        raise ValueError(f"Unsupported mode '{mode}'. Use 'simulator' or 'real'.")
+    raise ValueError(f"Unsupported mode '{mode}'. Use 'simulator' or 'real'.")
 
 
 __all__ = [

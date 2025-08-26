@@ -15,7 +15,7 @@ to handle error cases and implement proper movement logic.
 
 from robot_behavior.core.robot import Robot, Position
 from robot_behavior.simulator.enhanced_simulator import RobotProgram
-from robot_behavior.controllers import build_program, Program  # new unified abstraction
+from robot_behavior.controllers import build_program, Program  # unified abstraction (simulator | real)
 
 # Simple maze layouts for educational use
 SIMPLE_MAZE = [
@@ -61,14 +61,13 @@ def create_robot_program(width=10, height=10, start_x=0, start_y=0, mode: str = 
 def run_with_visualization(program, moves_function, move_delay=1.5):
     """Run student code with visualization *or* timed playback.
 
-    Works for both simulator and real modes so the same student file can be
-    reused:
+        Works for both supported modes:
 
-    - Simulator mode: launches GUI and animates moves with delay.
-    - Real mode: executes moves sequentially with ``time.sleep(move_delay)``
-      between moves (no GUI). If you need per-move custom speed/time values,
-      include them in your own calls to ``program.robot.move``; the added
-      sleep just spaces the commands similarly to the simulator animation.
+        - Simulator mode: launches GUI and animates moves with delay.
+        - Real mode: executes moves sequentially with ``time.sleep(move_delay)``
+            between moves (no GUI). Use your own speed/time kwargs in
+            ``program.robot.move`` if you need custom timing – the wrapper only
+            spaces the calls similarly to animation pacing.
     
     Args:
         program: Program (simulator or real)

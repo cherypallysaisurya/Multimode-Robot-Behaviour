@@ -1,8 +1,5 @@
 
 # Ensure local robot_behavior is used
-import sys
-import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from robot_behavior.minimal_api import create_robot_program, run_with_visualization
 
 def simple_example():

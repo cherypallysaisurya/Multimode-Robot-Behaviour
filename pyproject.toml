@@ -3,30 +3,84 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "myrobot"
-version = "0.1.0"
-description = "Unified educational robot API: simulator + optional real Go1 control"
+name = "unified-robot-control"
+version = "1.0.0"
+description = "Unified educational robot control: 2D simulator + real Go1 robot support with identical student API"
 readme = "README.md"
-authors = [{name="Your Name", email="you@example.com"}]
+authors = [{name="Sai Surya", email="cherypallysaisurya@example.com"}]
 license = {text = "MIT"}
 requires-python = ">=3.10"
+keywords = ["education", "robotics", "simulator", "go1", "quadruped", "robot-control"]
 classifiers = [
-  "Programming Language :: Python :: 3",
-  "License :: OSI Approved :: MIT License",
-  "Intended Audience :: Education",
-  "Topic :: Education",
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Education",
+    "Intended Audience :: Developers", 
+    "Topic :: Education",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
 ]
+
+# Core dependencies for simulator (tkinter usually comes with Python)
 dependencies = []
 
 [project.optional-dependencies]
-hardware = ["go1-py", "paho-mqtt", "numpy"]
-visual = ["Pillow"]
+# Hidden from students - only for real robot hardware
+# Students: pip install unified-robot-control
+# TAs: pip install unified-robot-control[hardware]
+hardware = [
+    "go1-py",  # Hidden robot library - students don't need to know about this
+    "paho-mqtt>=2.0.0",
+    "numpy>=1.20.0", 
+]
+
+# For enhanced visualization
+visual = [
+    "Pillow>=8.0.0",
+]
+
+# For development
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "isort>=5.0.0",
+]
+
+# Complete installation with all features
+full = [
+    "unified-robot-control[hardware,visual]"
+]
 
 [project.urls]
 Homepage = "https://github.com/cherypallysaisurya/Multimode-Robot-Behaviour"
+Documentation = "https://github.com/cherypallysaisurya/Multimode-Robot-Behaviour/blob/main/README.md"
+Repository = "https://github.com/cherypallysaisurya/Multimode-Robot-Behaviour"
+Issues = "https://github.com/cherypallysaisurya/Multimode-Robot-Behaviour/issues"
+
+[project.scripts]
+# Command-line interface (optional)
+unified-robot-demo = "unified_robot_control.examples.basic_movement:main"
 
 [tool.setuptools]
 package-dir = {"" = "src"}
+include-package-data = true
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+"unified_robot_control" = ["simulator/**/*", "examples/**/*"]
+
+# Development tools configuration
+[tool.black]
+line-length = 88
+target-version = ['py310']
+
+[tool.isort]
+profile = "black"
+line_length = 88

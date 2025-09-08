@@ -1,0 +1,2 @@
+[console_scripts]
+unified-robot-demo = unified_robot_control.examples.basic_movement:main

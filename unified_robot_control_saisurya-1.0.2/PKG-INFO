@@ -1,5 +1,5 @@
 Metadata-Version: 2.4
-Name: unified-robot-control-saisurya
+Name: unified-robot-control
 Version: 1.0.2
 Summary: Unified educational robot control: 2D simulator + real Go1 robot support with identical student API
 Author-email: Sai Surya <cherypallysaisurya@example.com>

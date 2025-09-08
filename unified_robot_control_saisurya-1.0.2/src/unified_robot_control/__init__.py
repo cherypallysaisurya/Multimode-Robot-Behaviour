@@ -10,7 +10,7 @@ Students use simulator by default, TAs can switch to real robot via environment 
 
 from .core import create_robot_program, run_with_visualization
 
-__version__ = "1.0.2"
+__version__ = "1.0.4"
 __author__ = "Sai Surya"
 __email__ = "csaisurya@example.com"
 

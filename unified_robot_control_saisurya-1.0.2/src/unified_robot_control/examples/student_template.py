@@ -1,5 +1,3 @@
-# 🎓 Quick Start Template for Students
-
 from unified_robot_control import create_robot_program, run_with_visualization
 
 def my_robot_program():

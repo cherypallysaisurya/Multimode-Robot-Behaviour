@@ -1,9 +1,7 @@
 
 import os
 
-# Environment variable override (for TAs)
-# Students use mode parameter normally, TAs can set ROBOT_MODE=real
-MODE = os.getenv("ROBOT_MODE", "simulator").lower()  # Default to simulator
+# Robot hardware and simulator settings
 
 
 ROBOT_SETTINGS = {
@@ -177,7 +175,7 @@ class RobotProgram:
     
     def __init__(self, mode: str = None):
         if mode is None:
-            mode = MODE  # Use global setting
+            mode = "simulator"  # Default fallback
         self.robot = RobotInterface(mode)
         self.mode = mode
     
@@ -200,28 +198,40 @@ def create_robot_program(grid_width=None, grid_height=None, start_x=None, start_
         grid_height: Height of simulator grid (default: 8)
         start_x: Starting X position (default: 0)
         start_y: Starting Y position (default: 0)
-        mode: "simulator" or "real" (default: uses environment or "simulator")
+        mode: "simulator" or "real" (overridden by ROBOT_MODE environment variable)
     
     Returns:
         RobotProgram: Program with robot.move() interface
     
     Example student usage:
-        # Normal usage (simulator by default)
+        # Normal usage (simulator by default, unless TA sets ROBOT_MODE)
         program = create_robot_program()
         
         # Custom grid size
         program = create_robot_program(grid_width=10, grid_height=6)
         
-        # Force mode (students can still do this)
+        # Student can specify mode (but TA's ROBOT_MODE overrides this)
         program = create_robot_program(mode="real")
         
-        # TAs can override with environment: export ROBOT_MODE=real
+        # TA absolute control:
+        # export ROBOT_MODE=real      # Forces ALL programs to use real robot
+        # export ROBOT_MODE=simulator # Forces ALL programs to use simulator
     """
-    # Priority: explicit mode > environment variable > default simulator
-    if mode is not None:
-        current_mode = mode
+    # Priority: environment variable > explicit mode > default simulator
+    # If TA sets ROBOT_MODE, it overrides everything (absolute TA control)
+    env_mode = os.getenv("ROBOT_MODE")
+    
+    if env_mode is not None:
+        current_mode = env_mode.lower()  # Environment variable has absolute priority
+        if current_mode not in ["simulator", "real"]:
+            raise ValueError(f"Invalid ROBOT_MODE environment variable: {env_mode}. Use 'simulator' or 'real'")
+        # Show override happening when it occurs
+        if mode is not None and mode != current_mode:
+            print(f"🔄 TA override: ROBOT_MODE={env_mode} overrides student's mode='{mode}'")
+    elif mode is not None:
+        current_mode = mode  # Student's explicit mode (when no env override)
     else:
-        current_mode = MODE  # Uses environment variable or default
+        current_mode = "simulator"  # Default fallback
     
     # Update simulator settings for this specific program instance
     if current_mode == "simulator" and any(param is not None for param in [grid_width, grid_height, start_x, start_y]):

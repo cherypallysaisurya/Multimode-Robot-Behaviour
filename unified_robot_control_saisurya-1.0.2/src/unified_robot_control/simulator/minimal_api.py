@@ -20,6 +20,7 @@ import threading
 import time as time_module
 import tkinter as tk
 from tkinter import messagebox
+import os
 
 def create_robot_program(width=10, height=10, start_x=0, start_y=0, mode: str = 'simulator', host: str | None = None, initial_mode: str | None = "Walk"):
     """
@@ -30,13 +31,19 @@ def create_robot_program(width=10, height=10, start_x=0, start_y=0, mode: str = 
         height: Grid height (3-20) 
         start_x: Starting X position
         start_y: Starting Y position
-        mode: 'simulator' or 'real'
+        mode: 'simulator' or 'real' (can be overridden by ROBOT_MODE environment variable)
         host: Host for real robot connection
         initial_mode: Initial robot mode for real hardware
         
     Returns:
         RobotProgram: Configured robot program instance
     """
+    # Check environment variable override first (priority: env var > parameter > default)
+    env_mode = os.environ.get('ROBOT_MODE')
+    if env_mode:
+        mode = env_mode
+        print(f"🌍 Using ROBOT_MODE environment variable: {mode}")
+    
     # Validate grid size
     if not (3 <= width <= 20) or not (3 <= height <= 20):
         # Create a temporary root window for the error dialog

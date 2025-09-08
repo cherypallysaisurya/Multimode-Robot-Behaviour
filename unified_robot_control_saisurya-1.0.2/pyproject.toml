@@ -1,0 +1,91 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "unified-robot-control-saisurya"
+version = "1.0.3"
+description = "Unified educational robot control: 2D simulator + real Go1 robot support with identical student API"
+readme = "README.md"
+authors = [{name="Sai Surya", email="cherypallysaisurya@example.com"}]
+license = {text = "MIT"}
+requires-python = ">=3.10"
+keywords = ["education", "robotics", "simulator", "go1", "quadruped", "robot-control"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Education",
+    "Intended Audience :: Developers", 
+    "Topic :: Education",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Operating System :: OS Independent",
+]
+
+# Core dependencies for both simulator and robot
+dependencies = [
+    "Pillow>=8.0.0",  # Required for simulator graphics
+    "paho-mqtt>=2.0.0",  # Required for real robot communication
+    "numpy>=1.20.0",  # Required for robot calculations
+]
+
+[project.optional-dependencies]
+# For development and testing
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "isort>=5.0.0",
+]
+
+# Legacy compatibility (keeping for backwards compatibility)
+hardware = [
+    "numpy>=1.20.0", 
+    "paho-mqtt>=2.0.0",
+]
+
+visual = [
+    "Pillow>=8.0.0",
+]
+
+# Complete installation with all features (now same as base)
+full = [
+    "unified-robot-control[dev]"
+]
+
+[project.urls]
+Homepage = "https://github.com/cherypallysaisurya/Multimode-Robot-Behaviour"
+Documentation = "https://github.com/cherypallysaisurya/Multimode-Robot-Behaviour/blob/main/README.md"
+Repository = "https://github.com/cherypallysaisurya/Multimode-Robot-Behaviour"
+Issues = "https://github.com/cherypallysaisurya/Multimode-Robot-Behaviour/issues"
+
+[project.scripts]
+# Command-line interface (optional)
+unified-robot-demo = "unified_robot_control.examples.basic_movement:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+include-package-data = true
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+"unified_robot_control" = [
+    "simulator/**/*", 
+    "examples/**/*", 
+    "robot_hardware/**/*",
+    "go1_py/**/*"
+]
+
+# Development tools configuration
+[tool.black]
+line-length = 88
+target-version = ['py310']
+
+[tool.isort]
+profile = "black"
+line_length = 88
